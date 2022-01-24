@@ -8,6 +8,11 @@ import json
 client = commands.Bot(command_prefix='!')
 channel_id = 934490823100366868
 
+with open('token.dat') as data:
+    token = data.readline()
+    print('Token fetched')
+    print('Connecting...')
+
 
 @client.event
 async def on_ready():
@@ -76,4 +81,4 @@ async def update(ctx):
 
 # alarm_message.start()
 
-client.run('ODk0OTE1MDA0NDEzOTE5MjMy.YVw8iw.KqvpCa4YXv5-PYVMW58dedQjKVE')
+client.run(token)
