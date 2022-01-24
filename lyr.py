@@ -6,10 +6,8 @@ import json
 def api_update(user):
     returntext = "Data has been updated. You may continue with other commands."
     with open('users.json') as data:
-        userlist = [literal_eval(line) for line in data]
-    index = [(i, el.index(user)) for i, el in enumerate(userlist) if user in el]
-    line = index[0][0]
-    key = userlist[line][1]
+        data_json = json.load(data)
+        key = data_json[user]
     url = "https://lyrania.co.uk/api/accounts.php?search="+key
     try:
         jdata = requests.get(url).json()

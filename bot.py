@@ -14,8 +14,10 @@ with open('token.dat') as token_data:
     print('Token fetched')
     print('Connecting...')
 if not path.exists('users.json'):
+    print("users.json does not exist. Creating...")
     with open('users.json', 'w') as users_data:
-        users_data.write("{}")
+        users_data.write("{\n\t}")
+        print("users.json created.")
 
 
 @client.event
@@ -62,17 +64,23 @@ async def key(ctx, api_key):
 async def update(ctx):
     channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
-    with open('users.json', 'w+') as data:
-        data_list = data.readlines()
-        if any(user_id in x for x in data_list):
+    with open('users.json') as data:
+        data_list = json.load(data)
+        if user_id in data_list.keys():
             await channel.send('API Key exists...\nUpdating your data...\n'
                                + lyr.api_update(user_id), delete_after=10)
         else:
             await channel.send("API key doesn't exist. Sent a message with instructions.", delete_after=10)
             await ctx.author.send('I need your api key to pull data from Lyrania. Please respond with !lyr key [key]')
             print('Sent API key request to ' + user_id)
-    await ctx.message.delete()
     print("Successfully ran update command for user, " + str(ctx.author))
+
+
+@client.command()
+async def exp(ctx, start, end, current_xp):
+    channel = client.get_channel(channel_id)
+    user_id = str(ctx.author.id)
+    await channel.send("This is in development, sorry!")
 
 
 # @tasks.loop(seconds=timer)
