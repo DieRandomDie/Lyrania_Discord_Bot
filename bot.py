@@ -8,8 +8,8 @@ import json
 client = commands.Bot(command_prefix='!')
 channel_id = 934490823100366868
 
-with open('token.dat') as data:
-    token = data.readline()
+with open('token.dat') as token_data:
+    token = token_data.readline()
     print('Token fetched')
     print('Connecting...')
 
@@ -32,23 +32,23 @@ async def _list(ctx):
 @client.command()
 async def key(ctx, api_key):
     user_id = str(ctx.author.id)
-    new_user = {user_id: api_key}
     # open users in read
     with open('users.json', 'r') as file:
         # converts json to dict
         file_data = json.load(file)
+        print(file_data)
         # check if user exists
         if user_id in file_data.keys():
             # update existing user's api key
             file_data[user_id] = api_key
+            await ctx.author.send('API key has been updated. You may now return to the server or use commands here.')
         else:
             # add new user
-            file_data[new_user] = [api_key]
+            file_data[user_id] = api_key
+            await ctx.author.send('API key has been added. You may now return to the server or use commands here.')
     # open users in write (to truncate file)
     with open('users.json', 'w') as file:
         json.dump(file_data, file, indent=4)
-        await ctx.author.send(
-            'API key has been updated. You can now use all API commands. You can return to the server or use commands here.')
     if ctx.channel.id == channel_id:
         await ctx.message.delete()
     print("Successfully ran key command for user, " + str(ctx.author))
@@ -58,7 +58,7 @@ async def key(ctx, api_key):
 async def update(ctx):
     channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
-    with open('users.json', 'r') as data:
+    with open('users.json', 'w+') as data:
         data_list = data.readlines()
         if any(user_id in x for x in data_list):
             await channel.send('API Key exists...\nUpdating your data...\n'
