@@ -1,3 +1,4 @@
+from os import path
 import discord
 import asyncio
 from discord.ext import commands, tasks
@@ -12,6 +13,9 @@ with open('token.dat') as token_data:
     token = token_data.readline()
     print('Token fetched')
     print('Connecting...')
+if not path.exists('users.json'):
+    with open('users.json', 'w') as users_data:
+        users_data.write("{}")
 
 
 @client.event
