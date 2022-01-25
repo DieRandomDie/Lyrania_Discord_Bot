@@ -22,16 +22,18 @@ if not path.exists('users.json'):
 
 @client.event
 async def on_ready():
+    channel = client.get_channel(channel_id)
+    print(channel)
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
+    await channel.send("Hello world!")
 
 
 @client.command(name='list')
 async def _list(ctx):
-    channel = client.get_channel(channel_id)
-    await channel.send('Available commands:\n!key [api_key] - saves your data to the bot.\n!update - syncs your data with live api data', delete_after=60)
+    await ctx.reply('Available commands:\n!key [api_key] - saves your data to the bot.\n!update - syncs your data with live api data')
     print("Successfully ran list command for user, " + str(ctx.author))
 
 
@@ -55,8 +57,6 @@ async def key(ctx, api_key):
     # open users in write (to truncate file)
     with open('users.json', 'w') as file:
         json.dump(file_data, file, indent=4)
-    if ctx.channel.id == channel_id:
-        await ctx.message.delete()
     print("Successfully ran key command for user, " + str(ctx.author))
 
 
@@ -68,9 +68,9 @@ async def update(ctx):
         data_list = json.load(data)
         if user_id in data_list.keys():
             await channel.send('API Key exists...\nUpdating your data...\n'
-                               + lyr.api_update(user_id), delete_after=10)
+                               + lyr.api_update(user_id))
         else:
-            await channel.send("API key doesn't exist. Sent a message with instructions.", delete_after=10)
+            await channel.send("API key doesn't exist. Sent a message with instructions.")
             await ctx.author.send('I need your api key to pull data from Lyrania. Please respond with !lyr key [key]')
             print('Sent API key request to ' + user_id)
     print("Successfully ran update command for user, " + str(ctx.author))
