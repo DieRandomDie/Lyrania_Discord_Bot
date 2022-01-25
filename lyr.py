@@ -16,8 +16,3 @@ def api_update(user):
     except:
         returntext = "An error occurred. Please try again."
     return returntext
-
-
-def start(bot, c, cid):
-    channel = bot.get_channel(cid)
-    user_id = str(c.author.id)
