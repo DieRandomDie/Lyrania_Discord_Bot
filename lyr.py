@@ -16,3 +16,11 @@ def api_update(user):
     except:
         returntext = "An error occurred. Please try again."
     return returntext
+
+
+def fetch(user, *key):
+    with open(user+".json") as data:
+        data_json = json.load(data)
+    for x in key:
+        data_json = data_json[x]
+    return data_json
