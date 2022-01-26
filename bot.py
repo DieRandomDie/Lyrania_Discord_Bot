@@ -8,7 +8,9 @@ import json
 
 client = commands.Bot(command_prefix='!')
 channel_id = 934490823100366868
-
+if not path.exists('token.dat'):
+    with open('token.dat') as token_data:
+        token_data.write(input("Bot token: "))
 with open('token.dat') as token_data:
     token = token_data.readline()
     print('Token fetched')
