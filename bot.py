@@ -41,7 +41,7 @@ async def on_ready():
 @client.command(name='list')
 async def _list(ctx):
     await ctx.reply(
-        'Available commands:\n!key [api_key] - saves your data to the bot.\n!update - syncs your data with live api data')
+        'Available commands:\n!key [api_key] - saves your data to the bot.\n!update - syncs your data with live api data.\n!exp <goal> <opt: current_gains> - shows xp needed for goal level.\n!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.')
     print("Successfully ran list command for user, " + str(ctx.author))
 
 
