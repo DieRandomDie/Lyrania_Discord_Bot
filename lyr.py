@@ -1,13 +1,12 @@
 from ast import literal_eval
 import requests
 import json
+from os import path
 
 
-def api_update(user):
+def api_update(d, user):
     returntext = "Data has been updated. You may continue with other commands."
-    with open('users.json') as data:
-        data_json = json.load(data)
-        key = data_json[user]
+    key = d[user]
     url = "https://lyrania.co.uk/api/accounts.php?search="+key
     try:
         jdata = requests.get(url).json()
@@ -24,3 +23,10 @@ def fetch(user, *key):
     for x in key:
         data_json = data_json[x]
     return data_json
+
+
+def checkfile(fname):
+    if path.exists(fname):
+        return True
+    else:
+        return False
