@@ -1,7 +1,8 @@
 import discord
 import asyncio
 import json
-from datetime import datetime
+from datetime import datetime as dt
+import pytz
 from discord.ext import commands, tasks
 from lyr import api_update, fetch, checkfile
 
@@ -35,13 +36,17 @@ async def on_ready():
     print(client.user.name)
     print(client.user.id)
     print('------')
-    await channel.send("Hello world!")
+    await channel.send("I have risen.")
 
 
 @client.command(name='list')
 async def _list(ctx):
     await ctx.reply(
-        'Available commands:\n!key [api_key] - saves your data to the bot.\n!update - syncs your data with live api data.\n!exp <goal> <opt: current_gains> - shows xp needed for goal level.\n!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.')
+        'Available commands:\n'
+        '!key [api_key] - saves your data to the bot.\n'
+        '!update - syncs your data with live api data.\n'
+        '!exp <goal> <opt: current_gains> - shows xp needed for goal level.\n'
+        '!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.')
     print("Successfully ran list command for user, " + str(ctx.author))
 
 
@@ -109,7 +114,9 @@ async def equips(ctx, gweaps=0, garms=0, bsmith=50):
     weap_cost = 0
     arms_cost = 0
     discount = 1 - bsmith/100
-    shortsword, dagger, helmet, shoulders, wrist, gloves, chestpiece, leggings, boots = equipment[keys[6]], equipment[keys[2]], equipment[keys[4]], equipment[keys[7]], equipment[keys[8]], equipment[keys[3]], equipment[keys[1]], equipment[keys[5]], equipment[keys[0]]
+    shortsword, dagger, helmet, shoulders, wrist, gloves, chestpiece, leggings, boots = equipment[keys[6]],\
+        equipment[keys[2]], equipment[keys[4]], equipment[keys[7]], equipment[keys[8]], equipment[keys[3]],\
+        equipment[keys[1]], equipment[keys[5]], equipment[keys[0]]
     for i in range(int(shortsword) + 1, int(gweaps) + 1):
         weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
     for i in range(int(helmet) + 1, int(garms) + 1):
@@ -118,12 +125,23 @@ async def equips(ctx, gweaps=0, garms=0, bsmith=50):
     await channel.send('Armours: {} to {} costs {:,.6f}'.format(helmet, garms, arms_cost*7))
 
 
-
 @tasks.loop(seconds=1)
 async def alarm_message():
     await client.wait_until_ready()
     channel = client.get_channel(channel_id)
-
+    time = dt.now(tz=pytz.timezone('Europe/London'))
+    hour = time.hour
+    minute = time.minute
+    second = time.second
+    if minute == 0 and hour%2 == 1 and second == 0:
+        await channel.send("Fight area boss!")
+        print(time)
+    if minute == 45 and hour%2 == 0 and second == 0:
+        await channel.send("Get area boss contract!!")
+        print(time)
+    if minute == 13 and hour == 19 and second == 0:
+        await channel.send("Almost time for guild boss. Get ready!")
+        print(time)
 
 alarm_message.start()
 client.run(token)
