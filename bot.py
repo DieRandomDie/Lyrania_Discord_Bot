@@ -7,7 +7,9 @@ from discord.ext import commands, tasks
 from lyr import api_update, fetch, checkfile
 
 client = commands.Bot(command_prefix='!')
+server_id = 799086296433164328
 channel_id = 934490823100366868
+notify = 936613130300182528
 # Check for token.dat file
 if not checkfile('token.dat'):
     # create file
@@ -31,12 +33,11 @@ with open('users.json') as user_data:
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
-    print(channel)
     print('Logged in as')
     print(client.user.name)
     print(client.user.id)
     print('------')
-    await channel.send("I have risen.")
+    await channel.send("I have risen.", delete_after=10)
 
 
 @client.command(name='list')
@@ -46,61 +47,73 @@ async def _list(ctx):
         '!key [api_key] - saves your data to the bot.\n'
         '!update - syncs your data with live api data.\n'
         '!exp <goal> <opt: current_gains> - shows xp needed for goal level.\n'
-        '!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.')
-    print("Successfully ran list command for user, " + str(ctx.author))
+        '!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.', delete_after=120)
+    print("Successfully ran list command for user, {}".format(ctx.author))
 
 
 @client.command()
 async def key(ctx, api_key):
+    channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
     # open users in read
     if user_id in client.userdata.keys():
         # update existing user's api key
         client.userdata[user_id] = api_key
-        await ctx.author.send('API key has been updated. You may now return to the server or use commands here.')
+        await ctx.reply('API key has been updated. You may now return to the server or use commands here.',
+                        delete_after=30)
     else:
         # add new user
         client.userdata[user_id] = api_key
-        await ctx.author.send('API key has been added. You may now return to the server or use commands here.')
+        await ctx.reply('API key has been added. You may now return to the server or use commands here.',
+                        delete_after=30)
     # open users in write (to truncate file)
     with open('users.json', 'w') as file:
         json.dump(client.userdata, file, indent=4)
         print("Saved users.json")
-    print("Successfully ran key command for user, " + str(ctx.author))
+    print("Successfully ran key command for user, {}".format(ctx.author))
+    if ctx.channel == channel:
+        await ctx.message.delete()
 
 
 @client.command()
 async def update(ctx):
-    channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
     if user_id in client.userdata.keys():
-        await channel.send('API Key exists...\nUpdating your data...\n' + api_update(client.userdata, user_id))
+        await ctx.reply('API Key exists...\nUpdating your data...\n' + api_update(client.userdata, user_id))
     else:
-        await channel.send("API key doesn't exist. Sent a message with instructions.")
+        await ctx.reply("API key doesn't exist. Sent a message with instructions.")
         await ctx.author.send('I need your api key to pull data from Lyrania. Please respond with !lyr key [key]')
         print('Sent API key request to ' + user_id)
-    print("Successfully ran update command for user, " + str(ctx.author))
+    print("Successfully ran update command for user, {}".format(ctx.author))
 
 
 @client.command()
 async def exp(ctx, end, current_xp=0):
-    channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
     start = int(fetch(user_id, "level")) + 1
     end = int(end)
     current_xp = int(current_xp)
     xp_needed = round(((end - start) / 2) * (start + end) * 25)
-    await channel.send('You need {xp:,} exp to reach level {lv:,}.'.format(xp=xp_needed, lv=end))
+    await ctx.reply('You need {xp:,} exp to reach level {lv:,}.'.format(xp=xp_needed, lv=end))
     if current_xp > 0:
-        await channel.send('This will take approximately {k:,} kills.'.format(k=round(xp_needed / current_xp)))
+        await ctx.reply('This will take approximately {k:,} kills.'.format(k=round(xp_needed / current_xp)),
+                        delete_after=30)
+
+
+@client.command()
+async def notifyme(ctx):
+    member = ctx.author
+    role = discord.utils.get(ctx.guild.roles, name="Notifications")
+    await member.add_roles(role)
+    await ctx.reply('You have been given the "Notifications" role.', delete_after=30)
+    print('{} has been granted {} role.'.format(member, role))
 
 
 @client.command(name='fetch')
 async def get_api(ctx, *args):
-    channel = client.get_channel(channel_id)
     user_id = str(ctx.author.id)
     test = fetch(user_id, args[0])
-    await channel.send('Your {x} is {y:,}'.format(x=args[0], y=int(test)))
+    await ctx.reply('Your {x} is {y:,}'.format(x=args[0], y=int(test)))
 
 
 @client.command()
@@ -121,8 +134,8 @@ async def equips(ctx, gweaps=0, garms=0, bsmith=50):
         weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
     for i in range(int(helmet) + 1, int(garms) + 1):
         arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-    await channel.send('Weapons: {} to {} costs {:,.6f}'.format(shortsword, gweaps, weap_cost*2))
-    await channel.send('Armours: {} to {} costs {:,.6f}'.format(helmet, garms, arms_cost*7))
+    await ctx.reply('Weapons: {} to {} costs {:,.6f}'.format(shortsword, gweaps, weap_cost*2))
+    await ctx.reply('Armours: {} to {} costs {:,.6f}'.format(helmet, garms, arms_cost*7))
 
 
 @tasks.loop(seconds=1)
@@ -130,18 +143,16 @@ async def alarm_message():
     await client.wait_until_ready()
     channel = client.get_channel(channel_id)
     time = dt.now(tz=pytz.timezone('Europe/London'))
-    hour = time.hour
-    minute = time.minute
-    second = time.second
-    if minute == 0 and hour%2 == 1 and second == 0:
-        await channel.send("Fight area boss!")
-        print(time)
-    if minute == 45 and hour%2 == 0 and second == 0:
-        await channel.send("Get area boss contract!!")
-        print(time)
+    hour, minute, second = time.hour, time.minute, time.second
+    if minute == 45 and hour % 2 == 0 and second == 0:
+        await channel.send('<@&{}> Get area boss contract!'.format(notify), delete_after=60)
+        print("Sent contract alert at {}".format(time))
+    if minute == 0 and hour % 2 == 1 and second == 0:
+        await channel.send('<@&{}> Fight area boss!'.format(notify), delete_after=60)
+        print("Sent fight alert at {}".format(time))
     if minute == 13 and hour == 19 and second == 0:
-        await channel.send("Almost time for guild boss. Get ready!")
-        print(time)
+        await channel.send('<@&{}> Almost time for guild boss. Get ready!'.format(notify), delete_after=60)
+        print("Sent guild boss alert at {}".format(time))
 
 alarm_message.start()
 client.run(token)
