@@ -6,19 +6,22 @@ import pytz
 from discord.ext import commands, tasks
 from lyr import api_update, fetch, checkfile
 
-client = commands.Bot(command_prefix='!')
-server_id = 799086296433164328
-channel_id = 934490823100366868
-notify = 936613130300182528
-# Check for token.dat file
-if not checkfile('token.dat'):
+client = commands.Bot(command_prefix='!', help_command=None)
+# Check for bot.dat file
+if not checkfile('bot.dat'):
     # create file
-    with open('token.dat', 'w') as token_data:
+    with open('bot.dat', 'w') as token_data:
         # request token
         token_data.write(input("Bot token: "))
-with open('token.dat') as token_data:
-    token = token_data.readline()
-    print('Token fetched')
+with open('bot.dat') as bot_data:
+    token = bot_data.readline().strip()
+    print(f'Token fetched.')
+    server_id = int(bot_data.readline().strip())
+    print(f'Server ID, {server_id}, fetched.')
+    channel_id = int(bot_data.readline().strip())
+    print(f'Channel ID, {channel_id}, fetched.')
+    notify = int(bot_data.readline().strip())
+    print(f'Notif Rank ID, {notify}, fetched.')
     print('Connecting...')
 if not checkfile('users.json'):
     print("users.json does not exist. Creating...")
@@ -43,9 +46,10 @@ async def on_ready():
 async def _list(ctx):
     await ctx.reply(
         'Available commands:\n'
-        '>>> !key [api_key] - saves your data to the bot. (use in DMs)\n'
+        '>>> !key <api_key> - saves your data to the bot. (use in DMs)\n'
         '!update - syncs your data with live api data.\n'
-        '!exp <goal> <opt: current_gains> - shows xp needed for goal level.\n'
+        '!exp <goal> <opt: current_gains> - shows xp needed for goal level. '
+        'Optional argument gives approximate kills to level.\n'
         '!equips <weap> <arm> <opt: blacksmith> - returns costs for upgrades.')
     print("Successfully ran list command for user, {}".format(ctx.author))
 
@@ -141,6 +145,7 @@ async def equips(ctx, gweaps=0, garms=0, bsmith=50):
 async def alarm_message():
     await client.wait_until_ready()
     channel = client.get_channel(channel_id)
+    general = client.get_channel(697818339992666205)
     time = dt.now(tz=pytz.timezone('Europe/London'))
     hour, minute, second = time.hour, time.minute, time.second
     if minute == 45 and hour % 2 == 0 and second == 0:
@@ -149,6 +154,8 @@ async def alarm_message():
     if minute == 0 and hour % 2 == 1 and second == 0:
         await channel.send('<@&{}> Fight area boss!'.format(notify), delete_after=600)
         print("Sent fight alert at {}".format(time))
+    if minute == 0 and hour == 19 and second == 0:
+        await general.send('@everyone guild boss in 15 minutes.', delete_after=600)
     if minute == 13 and hour == 19 and second == 0:
         await channel.send('<@&{}> Almost time for guild boss. Get ready!'.format(notify), delete_after=600)
         print("Sent guild boss alert at {}".format(time))
