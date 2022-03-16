@@ -1,3 +1,5 @@
+import math
+
 import discord
 import asyncio
 import json
@@ -125,20 +127,47 @@ async def equips(ctx, gweaps=0, garms=0, bsmith=50):
     with open(user_id+'.json') as data:
         data = json.load(data)
     equipment = data["equipment"]
-    keys = list(data["equipment"])
+    fixed_equipment = {}
+    for keys in equipment.keys():
+        equip = keys.split(" ")[1]
+        orb = keys.split(" ")[0]
+        level = equipment[keys]
+        fixed_equipment[equip] = {}
+        fixed_equipment[equip]['orb'] = orb
+        fixed_equipment[equip]['level'] = level
     weap_cost = 0
     arms_cost = 0
     discount = 1 - bsmith/100
-    shortsword, dagger, helmet, shoulders, wrist, gloves, chestpiece, leggings, boots = equipment[keys[6]],\
-        equipment[keys[2]], equipment[keys[4]], equipment[keys[7]], equipment[keys[8]], equipment[keys[3]],\
-        equipment[keys[1]], equipment[keys[5]], equipment[keys[0]]
-    for i in range(int(shortsword) + 1, int(gweaps) + 1):
+    shortsword = int(fixed_equipment['shortsword']['level'])
+    dagger = int(fixed_equipment['dagger']['level'])
+    helmet = int(fixed_equipment['helmet']['level'])
+    shoulders = int(fixed_equipment['shoulders']['level'])
+    wrist = int(fixed_equipment['wrist']['level'])
+    gloves = int(fixed_equipment['gloves']['level'])
+    chestpiece = int(fixed_equipment['chestpiece']['level'])
+    leggings = int(fixed_equipment['leggings']['level'])
+    boots = int(fixed_equipment['boots']['level'])
+
+    for i in range(shortsword + 1, int(gweaps) + 1):
         weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-    for i in range(int(helmet) + 1, int(garms) + 1):
+    for i in range(dagger + 1, int(gweaps) + 1):
+        weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(helmet + 1, int(garms) + 1):
         arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-    await ctx.reply('>>> Weapons: {} to {} costs {:,.6f}\n'
-                    'Armours: {} to {} costs {:,.6f}'
-                    .format(shortsword, gweaps, weap_cost*2, helmet, garms, arms_cost*7))
+    for i in range(shoulders + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(wrist + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(gloves + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(chestpiece + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(leggings + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    for i in range(boots + 1, int(garms) + 1):
+        arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+    await ctx.reply(f'>>> Weapons: ({shortsword}, {dagger}) to {gweaps} costs {math.ceil(weap_cost):,}\n'
+                    f'Armours: ({helmet}, {shoulders}, {wrist}, {gloves}, {chestpiece}, {leggings}, {boots}) to {garms} costs {math.ceil(arms_cost):,}')
 
 
 @tasks.loop(seconds=1)
