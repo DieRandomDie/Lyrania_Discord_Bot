@@ -3,7 +3,7 @@ import math
 import discord
 import asyncio
 import json
-from datetime import datetime as dt
+from datetime import datetime
 import pytz
 from discord.ext import commands, tasks
 from lyr import api_update, fetch, checkfile
@@ -175,7 +175,10 @@ async def alarm_message():
     await client.wait_until_ready()
     channel = client.get_channel(channel_id)
     general = client.get_channel(697818339992666205)
-    time = dt.now(tz=pytz.timezone('Europe/London'))
+    utc = pytz.utc
+    lyr = pytz.timezone('Europe/London')
+    utc_dt = datetime.now(utc)
+    time = utc_dt.astimezone(lyr)
     hour, minute, second = time.hour, time.minute, time.second
     if minute == 45 and hour % 2 == 0 and second == 0:
         await channel.send('<@&{}> Get area boss contract!'.format(notify), delete_after=600)
