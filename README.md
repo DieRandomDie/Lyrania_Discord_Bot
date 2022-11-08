@@ -11,3 +11,6 @@ COMMANDS:
 !list - SHOWS THESE COMMANDS
 !key <API KEY> - ADDS OR UPDATES USERS API KEYS FOR USE WITH COMMANDS REQUIRING API
 !update - UPDATES THE %USER_ID%.json FILE WITH LIVE API DATA.
+
+  Nov 8, '22
+  Will begin updating this again and convert it over to slash in the next few weeks.
