@@ -5,7 +5,7 @@ import json
 from datetime import datetime
 import pytz
 from discord.ext import tasks
-from lyr import api_update, fetch, checkfile
+from lyr import api_update, fetch, checkfile, plat
 
 client = discord.Bot()
 # Check for bot.dat file
@@ -38,6 +38,15 @@ with open('users.json') as user_data:
     client.userdata = json.load(user_data)
 
 
+async def update(ctx):
+    user_id = str(ctx.author.id)
+    if user_id in client.userdata.keys():
+        print(api_update(client.userdata, user_id))
+    else:
+        return 0
+    print(f"Successfully ran update command for user, {ctx.author}")
+
+
 @client.event
 async def on_ready():
     channel = client.get_channel(channel_id)
@@ -61,24 +70,16 @@ async def key(ctx, api_key: discord.Option(str, description="Your API key is in 
         with open('users.json', 'w') as file:
             json.dump(client.userdata, file, indent=4)
             print("Saved users.json")
+        await update(ctx)
     else:
         response = 'API key should be 32 characters. (I think o.0)'
     await ctx.respond(response, ephemeral=True)
 
 
-@client.command(description="Update your api data.")
-async def update(ctx):
-    user_id = str(ctx.author.id)
-    if user_id in client.userdata.keys():
-        await ctx.respond('>>> API Key exists...\nUpdating your data...\n' + api_update(client.userdata, user_id))
-    else:
-        await ctx.respond("API key doesn't exist. Please use </key:1039662112760397825>.")
-    print(f"Successfully ran update command for user, {ctx.author}")
-
-
 @client.command(description="Calculate experience needed to level to a given level.")
 async def exp(ctx, goal: discord.Option(int, description="The level you want to calculate to."),
               kill_xp: discord.Option(int, description="The amount of exp you get per kill.", required=False)):
+    await update(ctx)
     user_id = str(ctx.author.id)
     start = int(fetch(user_id, "level")) + 1
     goal = int(goal)
@@ -104,13 +105,15 @@ async def notifyme(ctx):
 @client.command(description="Calculate cost for equipment upgrades.")
 async def equips(ctx, goal_weaps: discord.Option(int, description="The level you want your weapons to be.", default=0),
                  goal_arms: discord.Option(int, description="The level you want your armors to be.", default=0),
-                 blacksmith: discord.Option(int, description="The level of the guild blacksmith", default=50)):
+                 blacksmith: discord.Option(int, description="The level of the guild blacksmith.", default=50)):
+    await update(ctx)
     user_id = str(ctx.author.id)
     try:
         with open(user_id+'.json') as data:
             data = json.load(data)
 
         equipment = data["equipment"]
+        platinum = plat(data["currency"]["money"])
         weap_cost = 0
         arms_cost = 0
         discount = 1 - blacksmith / 100
@@ -153,8 +156,15 @@ async def equips(ctx, goal_weaps: discord.Option(int, description="The level you
         if arms_cost:
             response += f'Armours: ({helmet}, {shoulders}, {wrist}, {gloves}, {chestpiece}, {leggings}, {boots}) to {goal_arms} costs {math.ceil(arms_cost):,}p'
         await ctx.respond(response)
+
+        if weap_cost or arms_cost:
+            if platinum - (weap_cost+arms_cost) >= 0:
+                await ctx.respond("You can afford this upgrade.", ephemeral=True)
+            else:
+                need = math.ceil((weap_cost + arms_cost) - platinum)
+                await ctx.respond(f"You still need {need:,}p.", ephemeral=True)
     except:
-        await ctx.respond("Your data does not exist. Please use </update:1039662112760397826>")
+        await ctx.respond("Your data does not exist. Please use </key:1040325043516878908>")
 
 
 @tasks.loop(seconds=1)
