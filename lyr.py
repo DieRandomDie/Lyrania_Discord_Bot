@@ -31,10 +31,7 @@ def checkfile(fname):
     else:
         return False
 
+
 def plat(p):
     plat_val = int(p.replace(",", "").split()[0][:-1])
     return plat_val
-
-
-money = "80,448,113p 44g 99s 98c"
-print(plat(money))
