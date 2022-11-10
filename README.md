@@ -2,19 +2,7 @@ WRITTEN BY DIERANDOMDIE
 =======================
 TO USE:
 
-1) CREATE TOKEN.DAT FILE WITH BOT TOKEN
-2) INSTALL REQUESTS, DISCORD.PY LIBS
-3) RUN BOT.PY
-
-COMMANDS:
-
-!list - SHOWS THESE COMMANDS
-
-!key <API KEY> - ADDS OR UPDATES USERS API KEYS FOR USE WITH COMMANDS REQUIRING API
-
-!update - UPDATES THE %USER_ID%.json FILE WITH LIVE API DATA.
-
-
- Nov 8, '22
-  
- Will begin updating this again and convert it over to slash in the next few weeks.
+1) Install requests, py-cord and dependencies
+2) Create a channel for notifications to be sent (or use an existing one).
+3) Create a rank for notifications. The bot will mention this rank for bosses.
+4) Run main.py
