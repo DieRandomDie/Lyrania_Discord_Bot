@@ -78,7 +78,7 @@ async def key(ctx, api_key: discord.Option(str, description="Your API key is in 
 
 @client.command(description="Calculate experience needed to level to a given level.")
 async def exp(ctx, goal: discord.Option(int, description="The level you want to calculate to."),
-              kill_xp: discord.Option(int, description="The amount of exp you get per kill.", required=False)):
+              kill_xp: discord.Option(int, description="The amount of exp you get per kill.", default=0, required=False)):
     await update(ctx)
     user_id = str(ctx.author.id)
     start = int(fetch(user_id, "level")) + 1
