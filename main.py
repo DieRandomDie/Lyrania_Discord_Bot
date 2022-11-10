@@ -109,11 +109,11 @@ async def equips(ctx, goal_weaps: discord.Option(int, description="The level you
     await update(ctx)
     user_id = str(ctx.author.id)
     try:
-        with open(user_id+'.json') as data:
-            data = json.load(data)
+        with open(user_id+'.json') as userdata:
+            userdata = json.load(userdata)
 
-        equipment = data["equipment"]
-        platinum = plat(data["currency"]["money"])
+        equipment = userdata["equipment"]
+        platinum = plat(userdata["currency"]["money"])
         weap_cost = 0
         arms_cost = 0
         discount = 1 - blacksmith / 100
@@ -188,6 +188,7 @@ async def alarm_message():
     if minute == 13 and hour == 19 and second == 0:
         await channel.send('<@&{}> Almost time for guild boss. Get ready!'.format(notify), delete_after=600)
         print("Sent guild boss alert at {}".format(time))
+
 
 alarm_message.start()
 client.run(token)
