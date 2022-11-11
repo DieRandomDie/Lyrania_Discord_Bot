@@ -161,24 +161,19 @@ async def equips(ctx, goal_weaps: discord.Option(int, description="The level you
         if weap_cost or arms_cost:
             total_text = ""
             if weap_cost:
-                embed_var.add_field(name="Weapons",
-                                    value=f"Shortsword: {shortsword} -> {goal_weaps} cost {math.ceil(shortsword_cost):,}p\n"
-                                          f"Dagger: {dagger} -> {goal_weaps} cost {math.ceil(dagger_cost):,}p",
-                                    inline=False)
+                embed_var.add_field(name="Weapons", value="Shortsword:\nDagger:")
+                embed_var.add_field(name="Upgrade", value=f"{shortsword} -> {goal_weaps}\n{dagger} -> {goal_weaps}")
+                embed_var.add_field(name="Cost", value=f"{math.ceil(shortsword_cost):,}p\n{math.ceil(dagger_cost):,}p")
+                # embed_var.add_field(name="\u200b", value="\u200b", inline=False)
                 total_text += f"Weapons Cost: {math.ceil(weap_cost):,}p\n"
             if arms_cost:
-                embed_var.add_field(name="Armours",
-                                    value=f"Helmet: {helmet} -> {goal_arms} cost {math.ceil(helmet_cost):,}p\n"
-                                          f"Shoulders: {shoulders} -> {goal_arms} cost {math.ceil(shoulders_cost):,}p\n"
-                                          f"Wrist: {wrist} -> {goal_arms} cost {math.ceil(wrist_cost):,}p\n"
-                                          f"Gloves: {gloves} -> {goal_arms} cost {math.ceil(gloves_cost):,}p\n"
-                                          f"Chestpiece: {chestpiece} -> {goal_arms} cost {math.ceil(chestpiece_cost):,}p\n"
-                                          f"Leggings: {leggings} -> {goal_arms} cost {math.ceil(leggings_cost):,}p\n"
-                                          f"Boots: {boots} -> {goal_arms} cost {math.ceil(boots_cost):,}p",
-                                    inline=False)
+                embed_var.add_field(name="Armors", value="Helmet:\nShoulders:\nWrist:\nGloves:\nChestpiece:\nLeggings:\nBoots:")
+                embed_var.add_field(name="Upgrade", value=f"{helmet} -> {goal_arms}\n{shoulders} -> {goal_arms}\n{wrist} -> {goal_arms}\n{gloves} -> {goal_arms}\n{chestpiece} -> {goal_arms}\n{leggings} -> {goal_arms}\n{boots} -> {goal_arms}")
+                embed_var.add_field(name="Cost", value=f"{math.ceil(helmet_cost):,}p\n{math.ceil(shoulders_cost):,}p\n{math.ceil(wrist_cost):,}p\n{math.ceil(gloves_cost):,}p\n{math.ceil(chestpiece_cost):,}p\n{math.ceil(leggings_cost):,}p\n{math.ceil(boots_cost):,}p")
+                # embed_var.add_field(name="\u200b", value="\u200b", inline=False)
                 total_text += f"Armours Cost: {math.ceil(arms_cost):,}p\n"
 
-            embed_var.add_field(name="Totals", value=f"{total_text}Total Cost:   {math.ceil(weap_cost+arms_cost):,}p")
+            embed_var.add_field(name="Totals", value=f"{total_text}Total Cost:   {math.ceil(weap_cost+arms_cost):,}p", inline=False)
             await ctx.respond(embed=embed_var)
 
             if platinum - (weap_cost+arms_cost) >= 0:
