@@ -108,63 +108,91 @@ async def equips(ctx, goal_weaps: discord.Option(int, description="The level you
                  blacksmith: discord.Option(int, description="The level of the guild blacksmith.", default=50)):
     await update(ctx)
     user_id = str(ctx.author.id)
+    embed_var = discord.Embed(title="Equips")
+
     try:
         with open(user_id+'.json') as userdata:
             userdata = json.load(userdata)
 
         equipment = userdata["equipment"]
         platinum = plat(userdata["currency"]["money"])
-        weap_cost = 0
-        arms_cost = 0
         discount = 1 - blacksmith / 100
         shortsword = int(equipment['Shortsword']['level'])
+        shortsword_cost = 0
         dagger = int(equipment['Dagger']['level'])
+        dagger_cost = 0
         helmet = int(equipment['Helmet']['level'])
+        helmet_cost = 0
         shoulders = int(equipment['Shoulders']['level'])
+        shoulders_cost = 0
         wrist = int(equipment['Wrist']['level'])
+        wrist_cost = 0
         gloves = int(equipment['Gloves']['level'])
+        gloves_cost = 0
         chestpiece = int(equipment['Chestpiece']['level'])
+        chestpiece_cost = 0
         leggings = int(equipment['Leggings']['level'])
+        leggings_cost = 0
         boots = int(equipment['Boots']['level'])
+        boots_cost = 0
 
-        for i in range(shortsword + 1, int(goal_weaps) + 1):
-            weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(dagger + 1, int(goal_weaps) + 1):
-            weap_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(helmet + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(shoulders + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(wrist + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(gloves + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(chestpiece + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(leggings + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
-        for i in range(boots + 1, int(goal_arms) + 1):
-            arms_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(shortsword + 1, goal_weaps + 1):
+            shortsword_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(dagger + 1, goal_weaps + 1):
+            dagger_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(helmet + 1, goal_arms + 1):
+            helmet_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(shoulders + 1, goal_arms + 1):
+            shoulders_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(wrist + 1, goal_arms + 1):
+            wrist_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(gloves + 1, goal_arms + 1):
+            gloves_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(chestpiece + 1, goal_arms + 1):
+            chestpiece_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(leggings + 1, goal_arms + 1):
+            leggings_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+        for i in range(boots + 1, goal_arms + 1):
+            boots_cost += ((0.005 * (i ** 2)) - .0101 * i + .0052) * discount
+
+        weap_cost = shortsword_cost+dagger_cost
+        arms_cost = helmet_cost+shoulders_cost+wrist_cost+gloves_cost+chestpiece_cost+leggings_cost+boots_cost
+
         if weap_cost or arms_cost:
-            response = ">>> "
-        else:
-            response = "You didn't give a level higher than your current equipment."
-        if weap_cost:
-            response += f'Weapons: ({shortsword}, {dagger}) to {goal_weaps} costs {math.ceil(weap_cost):,}p'
+            total_text = ""
+            if weap_cost:
+                embed_var.add_field(name="Weapons",
+                                    value=f"Shortsword: {shortsword} -> {goal_weaps} cost {math.ceil(shortsword_cost):,}p\n"
+                                          f"Dagger: {dagger} -> {goal_weaps} cost {math.ceil(dagger_cost):,}p",
+                                    inline=False)
+                total_text += f"Weapons Cost: {math.ceil(weap_cost):,}p\n"
             if arms_cost:
-                response += "\n"
-        if arms_cost:
-            response += f'Armours: ({helmet}, {shoulders}, {wrist}, {gloves}, {chestpiece}, {leggings}, {boots}) to {goal_arms} costs {math.ceil(arms_cost):,}p'
-        await ctx.respond(response)
+                embed_var.add_field(name="Armours",
+                                    value=f"Helmet: {helmet} -> {goal_arms} cost {math.ceil(helmet_cost):,}p\n"
+                                          f"Shoulders: {shoulders} -> {goal_arms} cost {math.ceil(shoulders_cost):,}p\n"
+                                          f"Wrist: {wrist} -> {goal_arms} cost {math.ceil(wrist_cost):,}p\n"
+                                          f"Gloves: {gloves} -> {goal_arms} cost {math.ceil(gloves_cost):,}p\n"
+                                          f"Chestpiece: {chestpiece} -> {goal_arms} cost {math.ceil(chestpiece_cost):,}p\n"
+                                          f"Leggings: {leggings} -> {goal_arms} cost {math.ceil(leggings_cost):,}p\n"
+                                          f"Boots: {boots} -> {goal_arms} cost {math.ceil(boots_cost):,}p",
+                                    inline=False)
+                total_text += f"Armours Cost: {math.ceil(arms_cost):,}p\n"
 
-        if weap_cost or arms_cost:
+            embed_var.add_field(name="Totals", value=f"{total_text}Total Cost:   {math.ceil(weap_cost+arms_cost):,}p")
+            await ctx.respond(embed=embed_var)
+
             if platinum - (weap_cost+arms_cost) >= 0:
                 await ctx.respond("You can afford this upgrade.", ephemeral=True)
             else:
                 need = math.ceil((weap_cost + arms_cost) - platinum)
                 await ctx.respond(f"You still need {need:,}p.", ephemeral=True)
+        else:
+            embed_var.add_field(name="Error", value="You didn't give a level higher than your current equipment.")
+            await ctx.respond(embed=embed_var)
+
     except:
-        await ctx.respond("Your data does not exist. Please use </key:1040325043516878908>")
+        embed_var.add_field(name="Error", value="Your data does not exist. Please use </key:1040325043516878908>")
+        await ctx.respond(embed=embed_var)
 
 
 @tasks.loop(seconds=1)
